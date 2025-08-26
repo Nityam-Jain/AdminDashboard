@@ -2,12 +2,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 
-export const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => { 
   try {
-    const { email, password } = req.body;
-
-    
-    const count = await User.countDocuments();
+   const { email, password } = req.body;
+  
+   const count = await User.countDocuments();
     let user;
 
     if (count === 0) {
