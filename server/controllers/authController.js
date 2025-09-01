@@ -5,7 +5,7 @@ import User from "../models/user.js";
 export const loginUser = async (req, res) => { 
   try {
    const { email, password } = req.body;
-  
+   
    const count = await User.countDocuments();
     let user;
 

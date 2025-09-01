@@ -20,6 +20,9 @@ const upload = multer({ storage });
 router.post("/", upload.single("image"), async (req, res) => {
   try {
     const { categoryName } = req.body;
+     if (!categoryName) {
+      return res.status(400).json({ error: "Category name is required" });
+    }
     const image = req.file ? req.file.path : null;
 
     const category = new Category({
@@ -35,13 +38,13 @@ router.post("/", upload.single("image"), async (req, res) => {
 });
 
 // Get All Categories
-router.get("/", async (req, res) => {
-  try {
-    const categories = await Category.find();
-    res.json(categories);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// router.get("/", async (req, res) => {
+//   try {
+//     const categories = await Category.find();
+//     res.json(categories);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 export default router;

@@ -1,0 +1,59 @@
+import Package from "../models/packageSchema.js";
+
+//get package
+export const getPackages = async (req, res) => {
+  try {
+    const packages = await Package.find(); 
+    res.json(packages);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//create package 
+export const createPackage = async (req, res) => {
+  try {
+    // console.log("Data:", req.files);
+    // console.log("📷 Incoming File:", req.file);
+
+    // Build package data
+    const packageData = {
+      ...req.body,
+      image: req.file ? `/uploads/package/${req.file.filename}` : null, // ✅ attach file path
+    };
+
+    const newPackage = new Package(packageData);
+    await newPackage.save();
+
+    res.status(201).json(newPackage);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// PUT /api/packages/:id
+export const updatePackage = async (req, res) => {
+  try {
+    const updated = await Package.findByIdAndUpdate(
+      req.params.id,
+      req.body, // only fields passed will update
+      { new: true } // return updated document
+    );
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// DELETE /api/packages/:id
+export const deletePackage = async (req, res) => {
+  try {
+    await Package.findByIdAndDelete(req.params.id);
+    res.json({ message: "Package deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+

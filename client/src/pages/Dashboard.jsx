@@ -1,25 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import CategoryModal from "../components/CategoryModal";
 import SubCategoryModal from "../components/SubCategoryModal";
+import PackageModal from "../components/PackageModal";
+import PackageCard from "../components/PackageCard";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
 
-  const [active, setActive] = useState(" ");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [active, setActive] = useState("");
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isSubCategoryModalOpen, setIsSubCategoryModalOpen] = useState(false);
+  const [isPackageModalOpen, setIsPackageModalOpen] = useState(false);
+  const [packages, setPackages] = useState([]);
+  const [editingPackage, setEditingPackage] = useState(null);
 
-  //logout 
-  const handleLogout = () => {
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/packages")
+      .then((res) => setPackages(res.data))
+      .catch((err) => console.error(err));
+  }, [isPackageModalOpen]);
 
-    localStorage.removeItem("token");
-
-
-    navigate("/"); //navigate to login page 
+  // Delete
+  const handleDelete = async (id) => {
+    await axios.delete(`http://localhost:5000/api/packages/${id}`);
+    setPackages(packages.filter((p) => p._id !== id)); // update UI
   };
+
+  // Edit (open modal with package data)
+  const handleEdit = (pkg) => {
+    setEditingPackage(pkg);
+    setIsPackageModalOpen(true); // open modal with pre-filled form
+  };
+
+  // Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
   const menuItems = [
-    { name: "Category", },
+    { name: "Category" },
+    { name: "Packages" },
   ];
 
   return (
@@ -36,18 +61,17 @@ export default function DashboardLayout() {
               key={item.name}
               onClick={() => setActive(item.name)}
               className={`flex items-center gap-2 w-full px-4 py-2 rounded-lg text-left font-medium transition 
-                ${active === item.name
-                  ? "bg-indigo-100 text-indigo-700"
-                  : "text-gray-700 hover:bg-gray-100"
+                ${
+                  active === item.name
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
             >
-              {item.icon}
               {item.name}
             </button>
           ))}
         </nav>
       </aside>
-
 
       <div className="flex-1 flex flex-col">
         {/* Topbar */}
@@ -64,47 +88,88 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {/* page content */}
-        <main className="flex-1 p-6">
-          {active === "Category" && (
+        {/* Category Page */}
+        {active === "Category" && (
+          <main className="flex-1 p-6">
             <div className="p-6 bg-white shadow rounded-xl">
               <h3 className="text-lg font-bold mb-4">Catalog Management</h3>
-              {/* <p className="text-gray-600 mb-6">Category section</p> */}
 
-
-              <div className="flex justify-between">
-                <button className="px-6 py-2 bg-blue-700 text-white font-medium rounded-lg hover:bg-blue-600 transition"
-                  onClick={() => setIsModalOpen(true)}
+              <div className="flex gap-4">
+                {/* Category */}
+                <button
+                  className="px-6 py-2 bg-blue-700 text-white font-medium rounded-lg hover:bg-blue-600 transition"
+                  onClick={() => setIsCategoryModalOpen(true)}
                 >
                   Add Category
                 </button>
-
-                
-                <SubCategoryModal
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
+                <CategoryModal
+                  isOpen={isCategoryModalOpen}
+                  onClose={() => setIsCategoryModalOpen(false)}
                 />
 
-                <button className="px-6 py-2 bg-blue-700 text-white font-medium rounded-lg hover:bg-blue-600 transition"
-                  onClick={() => setIsModalOpen(true)}
+                {/* SubCategory */}
+                <button
+                  className="px-6 py-2 bg-blue-700 text-white font-medium rounded-lg hover:bg-blue-600 transition"
+                  onClick={() => setIsSubCategoryModalOpen(true)}
                 >
                   Add SubCategory
                 </button>
-
-                
-                <CategoryModal
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
+                <SubCategoryModal
+                  isOpen={isSubCategoryModalOpen}
+                  onClose={() => setIsSubCategoryModalOpen(false)}
                 />
 
+                {/* Product (future modal placeholder) */}
                 <button className="px-6 py-2 bg-blue-700 text-white font-medium rounded-lg hover:bg-blue-600 transition">
                   Add Product
                 </button>
               </div>
             </div>
-          )}
-        </main>
+          </main>
+        )}
 
+        {/* Packages Page */}
+        {active === "Packages" && (
+          <main className="flex-1 p-6 flex flex-col items-start justify-start">
+            <div className="bg-white rounded-xl shadow p-6 w-full">
+              <h3 className="text-2xl font-bold mb-4">
+                Package <span className="text-blue-600">Manager</span>
+              </h3>
+
+              <div className="flex justify-between items-center">
+                <p className="text-gray-600">
+                  Manage and add travel packages here.
+                </p>
+
+                <button
+                  onClick={() => setIsPackageModalOpen(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700 transition"
+                >
+                  <span className="text-lg">＋</span> Add Package
+                </button>
+              </div>
+            </div>
+
+            {/* Modal */}
+            <PackageModal
+              isOpen={isPackageModalOpen}
+              onClose={() => setIsPackageModalOpen(false)}
+              editingPackage={editingPackage}
+              setEditingPackage={setEditingPackage}
+            />
+
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+              {packages.map((pkg) => (
+                <PackageCard
+                  key={pkg._id}
+                  pkg={pkg}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          </main>
+        )}
       </div>
     </div>
   );
