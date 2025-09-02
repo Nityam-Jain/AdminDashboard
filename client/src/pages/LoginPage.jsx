@@ -56,8 +56,8 @@ export default function LoginPage() {
     <section className="flex items-center justify-center min-h-screen bg-blue-100 px-4">
 
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-black mb-6 text-center">
-          Login
+        <h2 className="text-3xl font-bold text-black mb-6 text-center">
+         Admin Login
         </h2>
 
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
@@ -86,7 +86,7 @@ export default function LoginPage() {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="Enter Your Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#F59E0B] outline-none pr-10"
