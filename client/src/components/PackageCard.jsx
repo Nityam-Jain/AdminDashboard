@@ -21,11 +21,16 @@ export default function PackageCard({ pkg, onEdit, onDelete }) {
     });
   };
 
+  // Ensure image path works both with and without leading slash
+  const imageUrl = pkg.image?.startsWith("http")
+    ? pkg.image
+    : `http://localhost:5000${pkg.image}`;
+
   return (
     <div className="bg-white rounded-xl shadow overflow-hidden flex flex-col">
       {/* Image */}
       <img
-        src={`http://localhost:5000${pkg.image}`}
+        src={imageUrl}
         alt={pkg.city}
         className="w-full h-52 object-cover rounded-lg transition-transform duration-300 ease-out hover:scale-105 hover:shadow-lg"
       />

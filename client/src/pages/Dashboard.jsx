@@ -61,10 +61,9 @@ export default function DashboardLayout() {
               key={item.name}
               onClick={() => setActive(item.name)}
               className={`flex items-center gap-2 w-full px-4 py-2 rounded-lg text-left font-medium transition 
-                ${
-                  active === item.name
-                    ? "bg-indigo-100 text-indigo-700"
-                    : "text-gray-700 hover:bg-gray-100"
+                ${active === item.name
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "text-gray-700 hover:bg-gray-100"
                 }`}
             >
               {item.name}
@@ -151,12 +150,16 @@ export default function DashboardLayout() {
             </div>
 
             {/* Modal */}
+            {/* Modal */}
             <PackageModal
               isOpen={isPackageModalOpen}
-              onClose={() => setIsPackageModalOpen(false)}
+              onClose={() => {
+                setIsPackageModalOpen(false);
+                setEditingPackage(null);   
+              }}
               editingPackage={editingPackage}
-              setEditingPackage={setEditingPackage}
             />
+
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
               {packages.map((pkg) => (

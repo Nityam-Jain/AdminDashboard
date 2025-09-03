@@ -35,16 +35,37 @@ export const createPackage = async (req, res) => {
 // PUT /api/packages/:id
 export const updatePackage = async (req, res) => {
   try {
-    const updated = await Package.findByIdAndUpdate(
-      req.params.id,
-      req.body, // only fields passed will update
-      { new: true } // return updated document
-    );
+    
+    const pkg = await Package.findById(req.params.id);
+    if (!pkg) {
+      return res.status(404).json({ error: "Package not found" });
+    }
+
+   
+    Object.keys(req.body).forEach((key) => {
+      
+      if (key === "features[]" || key === "features") {
+        pkg.features = Array.isArray(req.body[key])
+          ? req.body[key]
+          : [req.body[key]];
+      } else {
+        pkg[key] = req.body[key];
+      }
+    });
+
+    //  image upload  replace 
+    if (req.file) {
+      pkg.image = `/uploads/package/${req.file.filename}`;
+    }
+
+    const updated = await pkg.save();
     res.json(updated);
   } catch (error) {
+    console.error("Update error:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // DELETE /api/packages/:id
 export const deletePackage = async (req, res) => {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function PackageModal({ isOpen, onClose, onSave, editingPackage }) {
   const initialFormData = {
@@ -17,12 +18,14 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
 
   const [formData, setFormData] = useState(initialFormData);
   const [image, setImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Prefill or reset form when modal opens
+  // ✅ Prefill or reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       if (editingPackage && editingPackage._id) {
+        // Edit Mode
         setIsEditing(true);
         setFormData({
           city: editingPackage.city || "",
@@ -36,20 +39,25 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
           included: editingPackage?.included || "",
           excluded: editingPackage?.excluded || "",
         });
-        setImage(null); // reset image so new one can be chosen
+        setImage(null);
+        setPreviewImage(
+          editingPackage.image ? `http://localhost:5000${editingPackage.image}` : null
+        );
       } else {
-        // fresh create
+        // ✅ Fresh create mode → clear everything
         setIsEditing(false);
         setFormData(initialFormData);
         setImage(null);
+        setPreviewImage(null);
       }
     }
   }, [isOpen, editingPackage]);
 
-  // Reset state when closing
+  // ✅ Reset state when closing modal
   const handleClose = () => {
     setFormData(initialFormData);
     setImage(null);
+    setPreviewImage(null);
     setIsEditing(false);
     onClose();
   };
@@ -62,7 +70,11 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
   };
 
   const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+    const file = e.target.files[0];
+    setImage(file);
+    if (file) {
+      setPreviewImage(URL.createObjectURL(file));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -77,7 +89,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
     fd.append("durationNights", formData.durationNights);
     fd.append("persons", formData.persons);
 
-    // append image only if selected
     if (image) {
       fd.append("image", image);
     }
@@ -91,14 +102,12 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
     try {
       let res;
       if (isEditing) {
-        // Update existing
         res = await axios.put(
           `http://localhost:5000/api/packages/${editingPackage._id}`,
           fd,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
       } else {
-        // Create new
         res = await axios.post(
           "http://localhost:5000/api/packages/create",
           fd,
@@ -106,13 +115,24 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
         );
       }
 
-      alert(`Package ${isEditing ? "updated" : "created"} successfully!`);
-      if (onSave) onSave(res.data);
+      // ✅ SweetAlert 
+      Swal.fire({
+        icon: "success",
+        title: `Package ${isEditing ? "updated" : "created"} successfully!`,
+        showConfirmButton: false,
+        timer: 1500,
+      });
 
+      if (onSave) onSave(res.data);
       handleClose();
     } catch (error) {
       console.error("Error saving package:", error.response?.data || error.message);
-      alert("Error: " + (error.response?.data?.error || "Something went wrong"));
+      // ✅ SweetAlert error
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.response?.data?.error || "Something went wrong",
+      });
     }
   };
 
@@ -156,7 +176,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
           {/* Duration */}
           <div className="col-span-2">
             <div className="grid grid-cols-2 gap-4">
-              {/* Duration Days */}
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Duration Days <span className="text-red-500">*</span>
@@ -177,7 +196,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
                 </select>
               </div>
 
-              {/* Duration Nights */}
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Duration Nights <span className="text-red-500">*</span>
@@ -225,10 +243,12 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
               accept="image/*"
               {...(!isEditing ? { required: true } : {})}
             />
-            {isEditing && editingPackage?.image && !image && (
-              <p className="text-sm text-gray-500 mt-1">
-                Current image will be kept if not changed
-              </p>
+            {previewImage && (
+              <img
+                src={previewImage}
+                alt="Preview"
+                className="mt-2 w-32 h-32 object-cover rounded-lg border"
+              />
             )}
           </div>
 
@@ -263,7 +283,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
           <div className="col-span-2 bg-gray-50 p-4 rounded-lg">
             <h3 className="text-md font-semibold mb-2">Package Details</h3>
             <div className="grid grid-cols-2 gap-4">
-              {/* What's Included */}
               <div>
                 <label className="block text-sm font-medium mb-1">What's Included</label>
                 <textarea
@@ -276,7 +295,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
                 ></textarea>
               </div>
 
-              {/* What's Excluded */}
               <div>
                 <label className="block text-sm font-medium mb-1">What's Excluded</label>
                 <textarea
