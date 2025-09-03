@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import {
   Calendar,
   MapPin,
@@ -11,15 +12,20 @@ import {
   X,
 } from "lucide-react";
 import axios from "axios";
+import Swal from "sweetalert2";
 import { useParams, useNavigate } from "react-router-dom";
-// import Footer from "../components/footer";
-// import Navbar from "../components/Navbar";
+import PackageModal from "../components/PackageModal";
+
 
 function PackageDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [packageData, setPackageData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isPackageModalOpen, setIsPackageModalOpen] = useState(false);
+  const [editingPackage, setEditingPackage] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,27 +66,46 @@ function PackageDetails() {
   const includes = packageData.included || [];
   const excludes = packageData.excluded || [];
 
-  // Admin action handlers
-  const handleEdit = () => {
-    navigate(`/admin/packages/edit/${id}`);
+  // ✅ same as in your card
+  const handleEdit = (pkg) => {
+    setEditingPackage(pkg);
+    setIsPackageModalOpen(true);
   };
 
+  // ✅ Handle delete same as card (with SweetAlert)
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this package?")) {
-      try {
-        await axios.delete(`http://localhost:5000/api/packages/${id}`);
-        alert("Package deleted successfully");
-        navigate("/admin/packages");
-      } catch (err) {
-        console.error("Error deleting package", err);
-        alert("Failed to delete package");
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(`http://localhost:5000/api/packages/${id}`);
+          Swal.fire("Deleted!", "The package has been deleted.", "success");
+          navigate("/DashboardLayout/packages");
+        } catch (err) {
+          console.error("Error deleting package", err);
+          Swal.fire("Error", "Failed to delete package", "error");
+        }
       }
-    }
+    });
+  };
+
+  // ✅ when modal saves, update the detail page
+  const handleSave = (updatedPackage) => {
+    setPackageData(updatedPackage);
+    setIsPackageModalOpen(false);
+    setEditingPackage(null);
   };
 
   return (
     <>
-      {/* <Navbar /> */}
       <div className="max-w-6xl mx-auto p-5 bg-gray-50">
         {/* Image */}
         <div className="mb-8">
@@ -108,12 +133,6 @@ function PackageDetails() {
             <span className="block text-3xl font-bold text-black mb-3">
               ₹{packageData.price}
             </span>
-            {/* <button
-              onClick={handleBookingPackage}
-              className="bg-black text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-700 transition"
-            >
-              Book This Package
-            </button> */}
           </div>
         </header>
 
@@ -236,24 +255,38 @@ function PackageDetails() {
             </div>
           </section>
 
-          {/* Admin Action Buttons */}
-          <div className="flex justify-end gap-4 mt-6">
+          {/* ✅ Admin Action Buttons */}
+          <div className="flex justify-end gap-3 mt-6">
             <button
-              onClick={handleEdit}
-              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-800 transition"
+              onClick={() => handleEdit(packageData)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 active:scale-95 transition"
             >
-              Edit
+              <FaEdit className="text-lg" />
+              <span>Edit</span>
             </button>
+
             <button
               onClick={handleDelete}
-              className="px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-800 transition"
+              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 active:scale-95 transition"
             >
-              Delete
+              <FaTrash className="text-lg" />
+              <span>Delete</span>
             </button>
           </div>
         </div>
       </div>
-      {/* <Footer /> */}
+
+      {/* ✅ Modal */}
+      <PackageModal
+        isOpen={isPackageModalOpen}
+        onClose={() => {
+          setIsPackageModalOpen(false);
+          setEditingPackage(null);
+        }}
+        editingPackage={editingPackage}
+        onSave={handleSave} 
+      />
+
     </>
   );
 }

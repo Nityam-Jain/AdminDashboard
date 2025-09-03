@@ -25,7 +25,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
   useEffect(() => {
     if (isOpen) {
       if (editingPackage && editingPackage._id) {
-        // Edit Mode
         setIsEditing(true);
         setFormData({
           city: editingPackage.city || "",
@@ -44,7 +43,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
           editingPackage.image ? `http://localhost:5000${editingPackage.image}` : null
         );
       } else {
-        // ✅ Fresh create mode → clear everything
         setIsEditing(false);
         setFormData(initialFormData);
         setImage(null);
@@ -53,7 +51,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
     }
   }, [isOpen, editingPackage]);
 
-  // ✅ Reset state when closing modal
   const handleClose = () => {
     setFormData(initialFormData);
     setImage(null);
@@ -79,7 +76,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const fd = new FormData();
     fd.append("city", formData.city);
     fd.append("description", formData.description);
@@ -89,10 +85,7 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
     fd.append("durationNights", formData.durationNights);
     fd.append("persons", formData.persons);
 
-    if (image) {
-      fd.append("image", image);
-    }
-
+    if (image) fd.append("image", image);
     if (formData.features) {
       formData.features.split(",").forEach((f) => fd.append("features[]", f.trim()));
     }
@@ -108,14 +101,11 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
           { headers: { "Content-Type": "multipart/form-data" } }
         );
       } else {
-        res = await axios.post(
-          "http://localhost:5000/api/packages/create",
-          fd,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+        res = await axios.post("http://localhost:5000/api/packages/create", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
 
-      // ✅ SweetAlert 
       Swal.fire({
         icon: "success",
         title: `Package ${isEditing ? "updated" : "created"} successfully!`,
@@ -127,7 +117,6 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
       handleClose();
     } catch (error) {
       console.error("Error saving package:", error.response?.data || error.message);
-      // ✅ SweetAlert error
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -137,195 +126,208 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-blue-100 bg-opacity-50 z-50">
-      <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto hide-scrollbar rounded-lg shadow-lg p-6 relative">
 
-        <h2 className="text-xl font-bold mb-4">
-          {isEditing ? "Edit Package" : "Add Package"}
-        </h2>
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50"
+      onClick={handleClose} // close when clicking outside
+    >
+      <div
+        className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto hide-scrollbar rounded-lg shadow-lg p-6 relative"
+        onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
+      >
 
-        <form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
-          {/* City */}
-          <div>
-            <label className="block text-sm font-medium mb-1">City</label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-              placeholder="Enter Package City"
-              required
-            />
-          </div>
 
-          {/* Price */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Price (In Rupees)</label>
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-              placeholder="Enter price (In Rupees)"
-              required
-            />
-          </div>
+        <div className="fixed inset-0 flex items-center justify-center z-50">
 
-          {/* Duration */}
-          <div className="col-span-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Duration Days <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="durationDays"
-                  value={formData.durationDays}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-3 py-2"
-                  required
-                >
-                  <option value="">Select Days</option>
-                  {[...Array(15)].map((_, i) => (
-                    <option key={i + 1} value={i + 1}>
-                      {i + 1}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Duration Nights <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="durationNights"
-                  value={formData.durationNights}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-3 py-2"
-                  required
-                >
-                  <option value="">Select Nights</option>
-                  {[...Array(15)].map((_, i) => (
-                    <option key={i + 1} value={i + 1}>
-                      {i + 1}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Persons */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Number of Persons</label>
-            <input
-              type="number"
-              name="persons"
-              value={formData.persons}
-              onChange={handleChange}
-              placeholder="Enter number of persons"
-              className="border rounded px-3 py-2 w-full"
-              required
-            />
-          </div>
-
-          {/* Image */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Image</label>
-            <input
-              type="file"
-              name="image"
-              onChange={handleImageChange}
-              className="w-full border rounded-lg px-3 py-2"
-              accept="image/*"
-              {...(!isEditing ? { required: true } : {})}
-            />
-            {previewImage && (
-              <img
-                src={previewImage}
-                alt="Preview"
-                className="mt-2 w-32 h-32 object-cover rounded-lg border"
-              />
-            )}
-          </div>
-
-          {/* Description */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Description</label>
-            <textarea
-              rows="3"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-              placeholder="Enter description"
-              required
-            ></textarea>
-          </div>
-
-          {/* Features */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Features</label>
-            <input
-              type="text"
-              name="features"
-              value={formData.features}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-              placeholder="Comma separated: Hotel Stay, Sightseeing"
-            />
-          </div>
-
-          {/* Package Details */}
-          <div className="col-span-2 bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-md font-semibold mb-2">Package Details</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">What's Included</label>
-                <textarea
-                  rows="4"
-                  name="included"
-                  value={formData.included}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-3 py-2"
-                  placeholder="Enter included points"
-                ></textarea>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">What's Excluded</label>
-                <textarea
-                  rows="4"
-                  name="excluded"
-                  value={formData.excluded}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-3 py-2"
-                  placeholder="Enter excluded points"
-                ></textarea>
-              </div>
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="col-span-2 flex justify-end gap-3 mt-4">
+          {/* White card only (no dark background) */}
+          <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto hide-scrollbar rounded-lg shadow-lg p-6 relative">
+            {/* X button */}
             <button
-              type="button"
-              className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
               onClick={handleClose}
+              className="absolute top-2 right-2 text-black text-xl hover:text-red-600"
             >
-              Cancel
+              ✖
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              {isEditing ? "Update" : "Create Package"}
-            </button>
+            <h2 className="text-xl font-bold mb-4">
+              {isEditing ? "Edit Package" : "Add Package"}
+            </h2>
+
+            <form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
+              {/* City */}
+              <div>
+                <label className="block text-sm font-medium mb-1">City</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className="w-full border rounded-lg px-3 py-2"
+                  placeholder="Enter Package City"
+                  required
+                />
+              </div>
+
+              {/* Price */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Price (In Rupees)</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="w-full border rounded-lg px-3 py-2"
+                  placeholder="Enter price (In Rupees)"
+                  required
+                />
+              </div>
+
+              {/* Duration */}
+              <div className="col-span-2 grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Duration Days</label>
+                  <select
+                    name="durationDays"
+                    value={formData.durationDays}
+                    onChange={handleChange}
+                    className="w-full border rounded-lg px-3 py-2"
+                    required
+                  >
+                    <option value="">Select Days</option>
+                    {[...Array(15)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Duration Nights</label>
+                  <select
+                    name="durationNights"
+                    value={formData.durationNights}
+                    onChange={handleChange}
+                    className="w-full border rounded-lg px-3 py-2"
+                    required
+                  >
+                    <option value="">Select Nights</option>
+                    {[...Array(15)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Persons */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Number of Persons</label>
+                <input
+                  type="number"
+                  name="persons"
+                  value={formData.persons}
+                  onChange={handleChange}
+                  placeholder="Enter number of persons"
+                  className="border rounded px-3 py-2 w-full"
+                  required
+                />
+              </div>
+
+              {/* Image */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-1">Image</label>
+                <input
+                  type="file"
+                  name="image"
+                  onChange={handleImageChange}
+                  className="w-full border rounded-lg px-3 py-2"
+                  accept="image/*"
+                  {...(!isEditing ? { required: true } : {})}
+                />
+                {previewImage && (
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="mt-2 w-32 h-32 object-cover rounded-lg border"
+                  />
+                )}
+              </div>
+
+              {/* Description */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <textarea
+                  rows="3"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="w-full border rounded-lg px-3 py-2"
+                  placeholder="Enter description"
+                  required
+                ></textarea>
+              </div>
+
+              {/* Features */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-1">Features</label>
+                <input
+                  type="text"
+                  name="features"
+                  value={formData.features}
+                  onChange={handleChange}
+                  className="w-full border rounded-lg px-3 py-2"
+                  placeholder="Comma separated: Hotel Stay, Sightseeing"
+                />
+              </div>
+
+              {/* Package Details */}
+              <div className="col-span-2 bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-md font-semibold mb-2">Package Details</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">What's Included</label>
+                    <textarea
+                      rows="4"
+                      name="included"
+                      value={formData.included}
+                      onChange={handleChange}
+                      className="w-full border rounded-lg px-3 py-2"
+                      placeholder="Enter included points"
+                    ></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">What's Excluded</label>
+                    <textarea
+                      rows="4"
+                      name="excluded"
+                      value={formData.excluded}
+                      onChange={handleChange}
+                      className="w-full border rounded-lg px-3 py-2"
+                      placeholder="Enter excluded points"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="col-span-2 flex justify-end gap-3 mt-4">
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                  onClick={handleClose}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  {isEditing ? "Update" : "Create Package"}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

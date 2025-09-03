@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import CategoryModal from "../components/CategoryModal";
 import SubCategoryModal from "../components/SubCategoryModal";
@@ -9,6 +9,7 @@ import PackageCard from "../components/PackageCard";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [active, setActive] = useState("");
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -23,6 +24,15 @@ export default function DashboardLayout() {
       .then((res) => setPackages(res.data))
       .catch((err) => console.error(err));
   }, [isPackageModalOpen]);
+
+  // Sync active menu with current path
+  useEffect(() => {
+    if (location.pathname.includes("category")) {
+      setActive("Category");
+    } else if (location.pathname.includes("packages")) {
+      setActive("Packages");
+    }
+  }, [location]);
 
   // Delete
   const handleDelete = async (id) => {
@@ -43,8 +53,8 @@ export default function DashboardLayout() {
   };
 
   const menuItems = [
-    { name: "Category" },
-    { name: "Packages" },
+    { name: "Category", path: "/DashboardLayout/category" },
+    { name: "Packages", path: "/DashboardLayout/packages" },
   ];
 
   return (
@@ -59,8 +69,7 @@ export default function DashboardLayout() {
           {menuItems.map((item) => (
             <button
               key={item.name}
-              onClick={() => setActive(item.name)}
-              className={`flex items-center gap-2 w-full px-4 py-2 rounded-lg text-left font-medium transition 
+              onClick={() => navigate(item.path)} className={`flex items-center gap-2 w-full px-4 py-2 rounded-lg text-left font-medium transition 
                 ${active === item.name
                   ? "bg-indigo-100 text-indigo-700"
                   : "text-gray-700 hover:bg-gray-100"
@@ -155,7 +164,7 @@ export default function DashboardLayout() {
               isOpen={isPackageModalOpen}
               onClose={() => {
                 setIsPackageModalOpen(false);
-                setEditingPackage(null);   
+                setEditingPackage(null);
               }}
               editingPackage={editingPackage}
             />
