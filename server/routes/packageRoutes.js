@@ -7,6 +7,7 @@ import {
   getPackages,
   updatePackage,
   deletePackage,
+  getPackageById,
 } from "../controllers/packageController.js";
 
 const router = express.Router();
@@ -38,5 +39,9 @@ router.put("/:id", upload.single("image"), updatePackage);
 
 // DELETE package by ID
 router.delete("/:id", deletePackage);
+
+//get product details by id 
+router.get("/details/:id", getPackageById);
+
 
 export default router;

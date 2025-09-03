@@ -75,6 +75,24 @@ export const deletePackage = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+}; 
+
+// GET /api/package/details/:id
+export const getPackageById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pkg = await Package.findById(id);
+
+    if (!pkg) {
+      return res.status(404).json({ error: "Package not found" });
+    }
+
+    res.json(pkg);
+  } catch (error) {
+    console.error("Get package by ID error:", error);
+    res.status(500).json({ error: error.message });
+  }
 };
+
 
 

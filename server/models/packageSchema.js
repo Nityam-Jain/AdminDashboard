@@ -21,12 +21,16 @@ const packageSchema = new mongoose.Schema({
 
   features: [{ type: String }],
   persons: { type: Number, required: true },
+
   included: {
-    type: String, 
+    type: [String],
+    default: [],
   },
   excluded: {
-    type: String, 
+    type: [String],
+    default: [],
   },
+
 
 });
 
