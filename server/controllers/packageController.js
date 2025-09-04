@@ -94,5 +94,20 @@ export const getPackageById = async (req, res) => {
   }
 };
 
+// Get recommendations by city
+export const getRecommendations = async (req, res) => {
+  try {
+    const { city } = req.params;
+
+    // Find other packages from the same city
+    const recommendations = await Package.find({ city: city }).limit(6); // limit results
+
+    res.status(200).json(recommendations);
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    res.status(500).json({ message: "Failed to fetch recommendations" });
+  }
+};
+
 
 

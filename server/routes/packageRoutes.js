@@ -8,6 +8,7 @@ import {
   updatePackage,
   deletePackage,
   getPackageById,
+  getRecommendations
 } from "../controllers/packageController.js";
 
 const router = express.Router();
@@ -43,5 +44,7 @@ router.delete("/:id", deletePackage);
 //get product details by id 
 router.get("/details/:id", getPackageById);
 
+// Recommendation route
+router.get("/recommendations/:city", getRecommendations);
 
 export default router;

@@ -89,8 +89,14 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
     if (formData.features) {
       formData.features.split(",").forEach((f) => fd.append("features[]", f.trim()));
     }
-    fd.append("included", formData.included);
-    fd.append("excluded", formData.excluded);
+    if (formData.included) {
+      formData.included.split(",").forEach((i) => fd.append("included[]", i.trim()));
+    }
+    if (formData.excluded) {
+      formData.excluded.split(",").forEach((e) => fd.append("excluded[]", e.trim()));
+    }
+    // fd.append("included", formData.included);
+    // fd.append("excluded", formData.excluded);
 
     try {
       let res;
@@ -144,7 +150,7 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
             {/* X button */}
             <button
               onClick={handleClose}
-              className="absolute top-2 right-2 text-black text-xl hover:text-red-600"
+              className="absolute top-2 right-2 text-black text-xl hover:text-red-600 font-semibold "
             >
               ✖
             </button>
@@ -292,7 +298,7 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
                       value={formData.included}
                       onChange={handleChange}
                       className="w-full border rounded-lg px-3 py-2"
-                      placeholder="Enter included points"
+                      placeholder="Comma separated: meals, guide, hotel"
                     ></textarea>
                   </div>
                   <div>
@@ -303,7 +309,7 @@ export default function PackageModal({ isOpen, onClose, onSave, editingPackage }
                       value={formData.excluded}
                       onChange={handleChange}
                       className="w-full border rounded-lg px-3 py-2"
-                      placeholder="Enter excluded points"
+                      placeholder="Comma separated: flights, personal expenses"
                     ></textarea>
                   </div>
                 </div>
