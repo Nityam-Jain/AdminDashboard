@@ -141,7 +141,7 @@ export default function DashboardLayout() {
           <main className="flex-1 p-6 flex flex-col items-start justify-start">
             <div className="bg-white rounded-xl shadow p-6 w-full">
               <h3 className="text-2xl font-bold mb-4">
-                Package <span className="text-blue-600">Manager</span>
+                Package <span className="text-blue-600">Management</span>
               </h3>
 
               <div className="flex justify-between items-center">

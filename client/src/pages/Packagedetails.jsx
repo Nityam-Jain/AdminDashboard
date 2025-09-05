@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
+import { FaStar, FaEdit, FaTrash, FaUser } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css/autoplay";
 import { Navigation, Autoplay } from "swiper/modules";
@@ -76,12 +77,11 @@ function PackageDetails() {
   const excludes = packageData.excluded || [];
 
   return (
-    <div className="max-w-6xl mx-auto p-5 bg-gray-50">
-      {/* 🔥 Top Section - Image Left + Details Right */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 items-center">
+    <div className="max-w-6xl mx-auto p-5 bg-gray-50 relative">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 items-start">
         {/* Image */}
         <section className="bg-white p-2 rounded-lg shadow">
-          <div className="w-full h-[400px] overflow-hidden rounded-lg shadow">
+          <div className="w-full h-[250px] sm:h-[350px] md:h-[400px] overflow-hidden rounded-lg shadow">
             <img
               src={imageUrl || "/placeholder.svg"}
               alt={packageData.city}
@@ -91,41 +91,67 @@ function PackageDetails() {
         </section>
 
         {/* Details */}
-        <section className="bg-white p-6 rounded-lg shadow">
-          <div className="flex flex-col justify-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+        <section 
+        className="bg-white p-6 rounded-lg shadow flex flex-col justify-between">
+          <div>
+            {/* City Title */}
+            <h1 className="text-2xl sm:text-2xl md:text-2xl font-bold text-gray-800 mb-4">
               {packageData.city}
             </h1>
+
+            {/* Location */}
             <div className="flex items-center text-gray-600 mb-4">
               <MapPin size={18} className="mr-2 text-black" />
               <span>{packageData.city}</span>
             </div>
-            <p className="text-gray-600 mb-6">
+
+            {/* Description */}
+            <p className="text-gray-600 mb-6 text-sm ">
               {packageData.description || "Default overview text."}
             </p>
-            <span className="block text-2xl font-semibold text-black mb-6">
+
+            {/* Price */}
+            <span className="block text-xl sm:text-xl font-semibold text-black mb-6">
               From{" "}
-              <span className="text-3xl font-bold">₹{packageData.price}</span>
+              <span className="text-2xl sm:text-2xl font-bold">
+                ₹{packageData.price}
+              </span>
             </span>
           </div>
         </section>
       </div>
+      {/* ✅ Buttons OUTSIDE the details box, responsive aligned right */}
+      <div className="flex justify-end gap-3 mt-4 md:mt-0 md:absolute md:right-6 md:top-90">
+        <button
+          className="w-20 sm:w-24 md:w-28 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 flex justify-center items-center"
+          onClick={() => alert(`Edit package: ${packageData._id}`)}
+        >
+          <FaEdit />
+        </button> 
+        <button
+          className="w-20 sm:w-24 md:w-28 py-2 bg-red-600 text-white rounded-md hover:bg-red-500 flex justify-center items-center"
+          onClick={() => alert(`Delete package: ${packageData._id}`)}
+        >
+          <FaTrash />
+        </button>
+      </div>
+
 
       {/* Content */}
       <div className="grid grid-cols-1 gap-8">
         {/* Overview */}
         <section className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-3 mb-4">
+          <h2 className="text-xl sm:text-xl font-semibold text-gray-800 border-b border-gray-200 pb-3 mb-4">
             About
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-sm ">
             {packageData.description || "Default overview text."}
           </p>
         </section>
 
         {/* Highlights */}
         <section className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-3 mb-6">
+          <h2 className="text-xl sm:text-xl font-semibold text-gray-800 border-b border-gray-200 pb-3 mb-6">
             Package Highlights
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -193,13 +219,13 @@ function PackageDetails() {
 
         {/* Includes & Excludes */}
         <section className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-3 mb-6">
+          <h2 className="text-xl sm:text-xl font-semibold text-gray-800 border-b border-gray-200 pb-3 mb-6">
             What's Included & Excluded
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Includes */}
             <div>
-              <h3 className="flex items-center gap-2 text-lg font-bold text-gray-800 mb-5">
+              <h3 className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-5">
                 <Check size={20} className="text-green-700" />
                 What's Included
               </h3>
@@ -215,10 +241,10 @@ function PackageDetails() {
                 ))}
               </ul>
             </div>
-        
+
             {/* Excludes */}
             <div>
-              <h3 className="flex items-center gap-2 text-lg font-bold text-gray-800 mb-5">
+              <h3 className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-5">
                 <X size={20} className="text-red-700" />
                 What's Not Included
               </h3>
@@ -236,46 +262,6 @@ function PackageDetails() {
             </div>
           </div>
         </section>
-
-
-
-        {/* ✅ Recommendations Section */}
-        <section className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-3 mb-6">
-            Recommended Packages in {packageData.city}
-          </h2>
-
-          {recommendations.filter((pkg) => pkg._id !== packageData._id).length > 0 ? (
-            <Swiper
-              modules={[Autoplay]}
-              loop={true}
-              autoplay={{
-                delay: 0, // no delay between slides
-                disableOnInteraction: false,
-                pauseOnMouseEnter: true,
-              }}
-              speed={3000} // controls how fast it scrolls (higher = slower)
-              spaceBetween={20}
-              slidesPerView={1}
-              breakpoints={{
-                640: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
-              }}
-            >
-              {recommendations
-                .filter((pkg) => pkg._id !== packageData._id)
-                .map((pkg) => (
-                  <SwiperSlide key={pkg._id}>
-                    <RecommendationCard pkg={pkg} />
-                  </SwiperSlide>
-                ))}
-            </Swiper>
-          ) : (
-            <p className="text-gray-600">No recommendations available.</p>
-          )}
-        </section>
-
       </div>
     </div>
   );

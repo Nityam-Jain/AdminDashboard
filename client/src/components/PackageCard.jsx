@@ -12,8 +12,8 @@ export default function PackageCard({ pkg, onEdit, onDelete }) {
       text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: "rgba(222, 30, 30, 1)",
+      cancelButtonColor: "#2771b6ff",
       confirmButtonText: "Yes, delete it!",
       cancelButtonText: "Cancel",
     }).then((result) => {
